@@ -142,6 +142,50 @@ one-line representation of the matrix above:
 x_1, y_1, z_1; x_2, y_2, z_2; x_3, y_3, z_3
 ```
 
+Fix Rotation Example
+-------------------
+
+To fix rotation issues using iio sensors proxy, you’ll need to adjust the
+mount matrix. 
+
+As an example; a Chuwi Hi10 X device is defined in 60-sensor.hwdb with this
+matrix line `ACCEL_MOUNT_MATRIX=0, 1, 0; 1, 0, 0; 0, 0, 1`. In this example the device has a
+90-degree counterclockwise rotation issue, where the bottom of the screen is always
+in the right hand. To correct this, you need to modify the matrix to reflect
+the desired orientation.
+
+For a 90-degree clockwise rotation fix, the matrix line should be:
+`0, -1, 0; 1, 0, 0; 0, 0, 1`
+
+$` \left[ {\begin{array}{ccc}
+   0 & -1 & 0\\
+   1 & 0 & 0\\
+   0 & 0 & 1\\
+  \end{array} } \right]
+`$
+
+
+Create a new or edit existing /etc/udev/hwdb.d/99-sensor.hwdb file and add the following lines:
+```
+sensor:modalias:acpi:MXC6655*:dmi:*:svnCHUWIInnovationAndTechnology*:pnHi10X:*
+ACCEL_MOUNT_MATRIX=0, -1, 0; 1, 0, 0; 0, 0, 1
+```
+
+Run the following commands to update the hardware database and trigger
+the changes:
+```
+sudo systemd-hwdb update
+sudo udevadm trigger
+```
+
+Restart the service to apply the changes:
+```
+sudo systemctl restart iio-sensor-proxy.service
+```
+
+Use the `monitor-sensor` command to check if the orientation is now corrected.
+
+
 Compass testing
 ---------------
 
