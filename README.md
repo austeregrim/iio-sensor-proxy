@@ -155,20 +155,21 @@ in the right hand. To correct this, you need to modify the matrix to reflect
 the desired orientation.
 
 For a 90-degree clockwise rotation fix, the matrix line should be:
-`0, -1, 0; 1, 0, 0; 0, 0, 1`
+`0, 1, 0; -1, 0, 0; 0, 0, 1`
+
+Second line: `-1, 0, 0` negates the sensor on its x axis.
 
 $` \left[ {\begin{array}{ccc}
-   0 & -1 & 0\\
-   1 & 0 & 0\\
+   0 & 1 & 0\\
+   -1 & 0 & 0\\
    0 & 0 & 1\\
   \end{array} } \right]
 `$
 
-
-Create a new or edit existing /etc/udev/hwdb.d/99-sensor.hwdb file and add the following lines:
+Create a new or edit existing /etc/udev/hwdb.d/99-sensor.hwdb file and add the following lines (using the wildcards to remove any unique module identifier that may not apply to your device, and requires a space before the `ACCEL_MOUNT_MATRIX` line):
 ```
-sensor:modalias:acpi:MXC6655*:dmi:*:svnCHUWIInnovationAndTechnology*:pnHi10X:*
-ACCEL_MOUNT_MATRIX=0, -1, 0; 1, 0, 0; 0, 0, 1
+sensor:modalias:acpi:MXC6655*:dmi:*:*:*:*
+ ACCEL_MOUNT_MATRIX=0, 1, 0; -1, 0, 0; 0, 0, 1
 ```
 
 Run the following commands to update the hardware database and trigger
@@ -184,6 +185,7 @@ sudo systemctl restart iio-sensor-proxy.service
 ```
 
 Use the `monitor-sensor` command to check if the orientation is now corrected.
+Rotate the tablet clockwise and `left-up` should be stated, and you can rotate counterclockwise back to `normal`.
 
 
 Compass testing
